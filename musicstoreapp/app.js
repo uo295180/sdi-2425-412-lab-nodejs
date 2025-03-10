@@ -43,4 +43,7 @@ app.use(function(err, req, res, next) {
   res.render('error');
 });
 
+app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'twig');
+
 module.exports = app;
