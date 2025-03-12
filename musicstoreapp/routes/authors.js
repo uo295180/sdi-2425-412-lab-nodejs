@@ -1,4 +1,57 @@
 module.exports = function (app) {
+    const autores = [
+        {
+            "name": "Carlos Santana",
+            "grupo": "Santana",
+            "role": "Guitarrista"
+        },
+        {
+            "name": "Luis Miguel",
+            "grupo": "Solista",
+            "role": "Cantante"
+        },
+        {
+            "name": "Charlie Parker",
+            "grupo": "Charlie Parker Quintet",
+            "role": "Saxofonista"
+        },
+        {
+            "name": "Wynton Marsalis",
+            "grupo": "Jazz at Lincoln Center Orchestra",
+            "role": "Trompetista"
+        },
+        {
+            "name": "Rubén González",
+            "grupo": "Buena Vista Social Club",
+            "role": "Pianista"
+        },
+        {
+            "name": "Itzhak Perlman",
+            "grupo": "Solista",
+            "role": "Violinista"
+        },
+        {
+            "name": "Frank Sinatra",
+            "grupo": "Solista",
+            "role": "Cantante"
+        },
+        {
+            "name": "John Coltrane",
+            "grupo": "John Coltrane Quartet",
+            "role": "Saxofonista"
+        },
+        {
+            "name": "Dizzy Gillespie",
+            "grupo": "Dizzy Gillespie Big Band",
+            "role": "Trompetista"
+        },
+        {
+            "name": "Chick Corea",
+            "grupo": "Return to Forever",
+            "role": "Pianista"
+        }
+    ]
+
     app.get('/authors/add', function (req, res) {
         roles = ["Cantante", "Trompetista", "Violinista", "Saxofonista", "Pianista"]
         let response = {
@@ -46,64 +99,20 @@ module.exports = function (app) {
     });
 
     app.get('/authors', function (req, res) {
-        let autores = [
-            {
-                "name": "Carlos Santana",
-                "grupo": "Santana",
-                "role": "Guitarrista"
-            },
-            {
-                "name": "Luis Miguel",
-                "grupo": "Solista",
-                "role": "Cantante"
-            },
-            {
-                "name": "Charlie Parker",
-                "grupo": "Charlie Parker Quintet",
-                "role": "Saxofonista"
-            },
-            {
-                "name": "Wynton Marsalis",
-                "grupo": "Jazz at Lincoln Center Orchestra",
-                "role": "Trompetista"
-            },
-            {
-                "name": "Rubén González",
-                "grupo": "Buena Vista Social Club",
-                "role": "Pianista"
-            },
-            {
-                "name": "Itzhak Perlman",
-                "grupo": "Solista",
-                "role": "Violinista"
-            },
-            {
-                "name": "Frank Sinatra",
-                "grupo": "Solista",
-                "role": "Cantante"
-            },
-            {
-                "name": "John Coltrane",
-                "grupo": "John Coltrane Quartet",
-                "role": "Saxofonista"
-            },
-            {
-                "name": "Dizzy Gillespie",
-                "grupo": "Dizzy Gillespie Big Band",
-                "role": "Trompetista"
-            },
-            {
-                "name": "Chick Corea",
-                "grupo": "Return to Forever",
-                "role": "Pianista"
-            }
-        ]
+
         let response = {
             autores: autores
         };
         res.render('authors/authors.twig', response);
 
     });
+
+    app.get('/authors/filter/:role', function (req, res) {
+        let response = {
+            autores: autores.filter(a => a.role.toLowerCase() === req.params.role.toLowerCase())
+        };
+        res.render('authors/authors.twig', response);
+    })
 
     app.get('/autho*', function (req, res) {
         res.redirect('/authors');
@@ -112,4 +121,6 @@ module.exports = function (app) {
     app.get('/authors/*', function (req, res) {
         res.redirect('/authors');
     });
+
+
 }
