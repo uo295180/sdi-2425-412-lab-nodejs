@@ -7,6 +7,8 @@ let bodyParser = require('body-parser');
 const {MongoClient} = require('mongodb');
 const connectionStrings = 'mongodb+srv://admin:sdi@musicstoreapp.lnkqv.mongodb.net/?retryWrites=true&w=majority&appName=musicstoreapp'
 const dbClient = new MongoClient(connectionStrings);
+let songsRepository = require('./repositories/songsRepository.js');
+
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 
@@ -25,11 +27,11 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-require("./routes/songs.js")(app, dbClient);
+songsRepository.init(app, dbClient);
+require("./routes/songs.js")(app, songsRepository);
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 require('./routes/authors.js')(app);
-
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
   next(createError(404));
