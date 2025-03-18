@@ -13,11 +13,16 @@ var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 
 var app = express();
-
+let fileUpload = require('express-fileupload');
+app.use(fileUpload({
+  limits: {fileSize: 50*1024*1024},
+  createParentPath: true
+}));
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'twig');
+app.set('uploadPath', __dirname);
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
