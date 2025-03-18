@@ -28,6 +28,13 @@ app.use(expressSession({
   saveUninitialized: true
 }));
 
+const userSessionRouter = require('./routes/userSessionRouter');
+const userAudiosRouter = require('./routes/userAudiosRouter');
+app.use("/songs/add",userSessionRouter);
+app.use("/publications",userSessionRouter);
+app.use("/shop/",userSessionRouter);
+app.use("/audios/", userAudiosRouter);
+
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'twig');
