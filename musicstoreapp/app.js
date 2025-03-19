@@ -9,6 +9,7 @@ const connectionStrings = 'mongodb+srv://admin:sdi@musicstoreapp.lnkqv.mongodb.n
 const dbClient = new MongoClient(connectionStrings);
 let songsRepository = require('./repositories/songsRepository.js');
 let usersRepository = require('./repositories/usersRepository.js');
+let favoritesRepository = require('./repositories/favoriteSongsRepository.js');
 var indexRouter = require('./routes/index');
 
 var app = express();
@@ -33,6 +34,7 @@ const userAudiosRouter = require('./routes/userAudiosRouter');
 app.use("/songs/add",userSessionRouter);
 app.use("/publications",userSessionRouter);
 app.use("/shop/",userSessionRouter);
+app.use("/songs/favorites",userSessionRouter);
 app.use("/audios/", userAudiosRouter);
 
 // view engine setup
@@ -50,8 +52,10 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+favoritesRepository.init(app, dbClient);
 songsRepository.init(app, dbClient);
 usersRepository.init(app, dbClient);
+require("./routes/songs/favorites.js")(app, favoritesRepository, songsRepository);
 require("./routes/songs.js")(app, songsRepository);
 app.use('/', indexRouter);
 require('./routes/users.js')(app, usersRepository);
