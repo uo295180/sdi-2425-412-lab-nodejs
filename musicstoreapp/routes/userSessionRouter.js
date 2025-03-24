@@ -5,6 +5,7 @@ userSessionRouter.use(function(req, res, next) {
     if ( req.session.user ) {
 // dejamos correr la petición
         next();
+        return;
     } else {
         console.log("va a: " + req.originalUrl);
         res.redirect("/users/login");

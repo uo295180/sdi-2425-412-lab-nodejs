@@ -35,6 +35,8 @@ const userAudiosRouter = require('./routes/userAudiosRouter');
 const userAuthorRouter = require('./routes/userAuthorRouter');
 app.use("/songs/add",userSessionRouter);
 app.use("/publications",userSessionRouter);
+app.use("/songs/buy",userSessionRouter);
+app.use("/purchases",userSessionRouter);
 app.use("/shop/",userSessionRouter);
 app.use("/songs/edit",userAuthorRouter);
 app.use("/songs/delete",userAuthorRouter);

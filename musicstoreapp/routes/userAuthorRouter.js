@@ -11,6 +11,7 @@ userAuthorRouter.use(function (req, res, next) {
     songsRepository.findSong(filter, {}).then(song => {
         if (req.session.user && song.author === req.session.user) {
             next();
+            return;
         } else {
             res.redirect("/shop");
         }
