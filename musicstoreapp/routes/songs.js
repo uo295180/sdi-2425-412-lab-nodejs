@@ -108,8 +108,8 @@ module.exports = function (app, songsRepository, commentsRepository) {
                 "author": "Prueba2",
                 "text": "No me gusta"
             }];
-            res.render("songs/song.twig", {song: song, comments: comments});
-
+            puedeComprarCancion(filter._id, req.session.user).then(result =>
+                res.render("songs/song.twig", {song: song, comments: comments, puedeComprarse: result}));
         }).catch(error => {
             res.send("Se ha producido un error al buscar la canción " + error)
         });
@@ -248,4 +248,50 @@ module.exports = function (app, songsRepository, commentsRepository) {
             callback(true); // FIN
         }
     };
+
+    // async function puedeComprarCancion(id, user) {
+    //     let filter = {author : user, _id: id};
+    //     let options = {sort: {title: 1}};
+    //     songsRepository.getSongs(filter, options).then(songs => {
+    //         console.log(songs.length);
+    //         if(songs.length === 1) {
+    //             return false;
+    //         }
+    //         filter = {user: user};
+    //         options = {projection: {_id: 0, song_id: 1}};
+    //         songsRepository.getPurchases(filter, options).then(purchasedIds => {
+    //             if(purchasedIds.find(song => song.song_id === id)) {
+    //                 return false;
+    //             }
+    //         }).catch(error => {
+    //             console.log(error);
+    //         });
+    //         return true;
+    //     }).catch(error => {
+    //         console.log(error);
+    //     });
+    // }
+
+    async function puedeComprarCancion(id, user) {
+        try {
+            let filter = {author: user, _id: id};
+            let options = {sort: {title: 1}};
+            let songs = await songsRepository.getSongs(filter, options);
+            if (songs.length >= 1) {
+                return false
+            }
+            filter = {user: user, song_id: id};
+            options = {projection: {_id: 0, song_id: 1}};
+
+            const purchasedIds = await songsRepository.getPurchases(filter, options);
+            console.log(purchasedIds);
+            if (purchasedIds.length >= 1) {
+                return false;
+            }
+
+            return true;
+        } catch (error) {
+            console.log(error);
+        }
+    }
 }
