@@ -20,6 +20,15 @@ app.set('jwt', jwt)
 
 let crypto = require('crypto');
 
+app.use(function(req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Credentials", "true");
+  res.header("Access-Control-Allow-Methods", "POST, GET, DELETE, UPDATE, PUT");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type,  Accept, token");
+// Debemos especificar todas las headers que se aceptan. Content-Type , token
+  next();
+});
+
 let fileUpload = require('express-fileupload');
 app.use(fileUpload({
   limits: {fileSize: 50*1024*1024},
