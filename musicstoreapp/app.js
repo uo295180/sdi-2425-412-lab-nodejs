@@ -15,6 +15,9 @@ var indexRouter = require('./routes/index');
 
 var app = express();
 
+let jwt = require('jsonwebtoken');
+app.set('jwt', jwt)
+
 let crypto = require('crypto');
 
 let fileUpload = require('express-fileupload');
@@ -33,15 +36,18 @@ app.use(expressSession({
 const userSessionRouter = require('./routes/userSessionRouter');
 const userAudiosRouter = require('./routes/userAudiosRouter');
 const userAuthorRouter = require('./routes/userAuthorRouter');
+const userTokenRouter = require('./routes/userTokenRouter');
 app.use("/songs/add",userSessionRouter);
 app.use("/publications",userSessionRouter);
 app.use("/songs/buy",userSessionRouter);
 app.use("/purchases",userSessionRouter);
 app.use("/shop/",userSessionRouter);
 app.use("/songs/edit",userAuthorRouter);
+app.use("/api/v1.0/songs", userTokenRouter);
 app.use("/songs/delete",userAuthorRouter);
 app.use("/songs/favorites",userSessionRouter);
 app.use("/audios/", userAudiosRouter);
+
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -64,7 +70,7 @@ usersRepository.init(app, dbClient);
 commentsRepository.init(app, dbClient);
 require("./routes/songs/favorites.js")(app, favoritesRepository, songsRepository);
 require("./routes/songs.js")(app, songsRepository, commentsRepository);
-require("./routes/api/songsAPIv1.0.js")(app, songsRepository)
+require("./routes/api/songsAPIv1.0.js")(app, songsRepository, usersRepository)
 app.use('/', indexRouter);
 require('./routes/users.js')(app, usersRepository);
 require('./routes/authors.js')(app);
