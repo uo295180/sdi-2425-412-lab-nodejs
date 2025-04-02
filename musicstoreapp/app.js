@@ -12,11 +12,13 @@ let usersRepository = require('./repositories/usersRepository.js');
 let favoritesRepository = require('./repositories/favoriteSongsRepository.js');
 let commentsRepository = require('./repositories/commentsRepository.js');
 var indexRouter = require('./routes/index');
+let jwt = require('jsonwebtoken');
+let rest = require('request');
 
 var app = express();
 
-let jwt = require('jsonwebtoken');
-app.set('jwt', jwt)
+app.set('jwt', jwt);
+app.set('rest', rest);
 
 let crypto = require('crypto');
 

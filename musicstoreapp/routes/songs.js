@@ -96,15 +96,9 @@ module.exports = function (app, songsRepository, commentsRepository) {
 
     app.get('/songs/:id', function (req, res) {
         let filter = {_id: new ObjectId(req.params.id)};
+        let user = req.session.user;
         let options = {};
         songsRepository.findSong(filter, options).then(song => {
-            // let commentFilter = {song_id: new ObjectId(req.params.id)};
-            // commentsRepository.getComments(commentFilter, options).then(comments => {
-            //     res.render("songs/song.twig", {song: song, comments: comments});
-            // })
-            //     .catch(error => {
-            //         res.send("Error recopilando los comentarios para la canción " + error)
-            //     })
             let comments = [{
                 "author": "Prueba1",
                 "text": "Muy buena canción"
@@ -112,8 +106,20 @@ module.exports = function (app, songsRepository, commentsRepository) {
                 "author": "Prueba2",
                 "text": "No me gusta"
             }];
-            puedeComprarCancion(filter._id, req.session.user).then(result =>
-                res.render("songs/song.twig", {song: song, comments: comments, puedeComprarse: result}));
+            puedeComprarCancion(filter._id, req.session.user).then(result => {
+                let settings = {
+                    url: "https://api.currencyapi.com/v3/latest?apikey=cur_live_dNpdgp64Xa9ACouPaXRGUTbSLeTgy9NP7DnHnp1I&base_currency=EUR&currencies=USD",
+                    method: "GET"
+                }
+                let rest = app.get("rest");
+                rest(settings, function (error, response, body) {
+                    console.log("cod: " + response.statusCode + " Cuerpo :" + body);
+                    let responseObject = JSON.parse(body);
+                    let rateUSD = responseObject.data.USD.value;
+// nuevo campo "usd" redondeado a dos decimales
+                    let songValue = song.price / rateUSD
+                    song.usd = Math.round(songValue * 100) / 100;
+                    res.render("songs/song.twig", {song: song, comments: comments, puedeComprarse: result})});});
         }).catch(error => {
             let message = "Se ha producido un error al buscar la canción"
             res.redirect('/error?message=' + message + '&status='+ error.status + '&stack=' + error.stack);
