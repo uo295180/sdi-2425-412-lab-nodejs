@@ -40,17 +40,24 @@ module.exports = function (app, songsRepository, usersRepository) {
         try {
             let songId = new ObjectId(req.params.id)
             let filter = {_id: songId}
-            songsRepository.deleteSong(filter, {}).then(result => {
-                if (result === null || result.deletedCount === 0) {
-                    res.status(404);
-                    res.json({error: "ID inválido o no existe, no se ha borrado el registro."});
+            validateUser(res.user, songId,function(response) {
+                if(response === null) {
+                    songsRepository.deleteSong(filter, {}).then(result => {
+                        if (result === null || result.deletedCount === 0) {
+                            res.status(404);
+                            res.json({error: "ID inválido o no existe, no se ha borrado el registro."});
+                        } else {
+                            res.status(200);
+                            res.send(JSON.stringify(result));
+                        }
+                    }).catch(error => {
+                            res.status(500);
+                            res.json({error: "Se ha producido un error al eliminar la canción."})
+                    });
                 } else {
-                    res.status(200);
-                    res.send(JSON.stringify(result));
+                    res.status(400);
+                    res.send(response);
                 }
-            }).catch(error => {
-                res.status(500);
-                res.json({error: "Se ha producido un error al eliminar la canción."})
             });
         } catch (e) {
             res.status(500);
@@ -64,21 +71,27 @@ module.exports = function (app, songsRepository, usersRepository) {
                 title: req.body.title,
                 kind: req.body.kind,
                 price: req.body.price,
-                author: req.session.user
+                author: res.user
             }
-// Validar aquí: título, género, precio y autor.
-            songsRepository.insertSong(song, function (songId) {
-                if (songId === null) {
-                    res.status(409);
-                    res.json({error: "No se ha podido crear la canción. El recurso ya existe."});
+            validatePostInput(song, function(response) {
+                if(response === null) {
+                    songsRepository.insertSong(song, function (songId) {
+                        if (songId === null) {
+                            res.status(409);
+                            res.json({error: "No se ha podido crear la canción. El recurso ya existe."});
+                        } else {
+                            res.status(201);
+                            res.json({
+                                message: "Canción añadida correctamente.",
+                                _id: songId
+                            })
+                        }
+                    });
                 } else {
-                    res.status(201);
-                    res.json({
-                        message: "Canción añadida correctamente.",
-                        _id: songId
-                    })
+                    res.status(400);
+                    res.json({error: response})
                 }
-            });
+            })
         } catch (e) {
             res.status(500);
             res.json({error: "Se ha producido un error al intentar crear la canción: " + e})
@@ -92,7 +105,7 @@ module.exports = function (app, songsRepository, usersRepository) {
 //Si la _id NO no existe, no crea un nuevo documento.
             const options = {upsert: false};
             let song = {
-                author: req.session.user
+                author: res.user
             }
             if (typeof req.body.title !== "undefined" && req.body.title !== null)
                 song.title = req.body.title;
@@ -168,6 +181,72 @@ module.exports = function (app, songsRepository, usersRepository) {
                 authenticated: false
             })
         }
-    })
+    });
+
+    function validatePostInput(song, callbackFunction) {
+        let errors = [];
+        if(song.title === null || song.title === undefined || song.title.trim() === "") {
+            errors.push({
+               "value": song.title,
+               "msg": "Campo de título inválido",
+                "param": "title",
+                "location": "body"
+            });
+        }
+        if(song.kind === null || song.kind === undefined || song.kind.trim() === "") {
+            errors.push({
+                "value": song.kind,
+                "msg": "Campo de tipo inválido",
+                "param": "kind",
+                "location": "body"
+            });
+        }
+        if(song.price === null || song.price === undefined || song.price.trim() === "") {
+            errors.push({
+                "value": song.price,
+                "msg": "Campo de precio inválido",
+                "param": "precio",
+                "location": "body"
+            });
+
+        } else {
+            if(song.price < 0){
+                errors.push({
+                    "value": song.price,
+                    "msg": "El precio no puede ser negativo",
+                    "param": "price",
+                    "location": "body"
+                })
+            }
+        }
+        if(song.author === null || song.author === undefined) {
+            errors.push({
+                "value": song.author,
+                "msg": "Autor inválido",
+                "param": "author",
+                "location": "headers"
+            })
+        }
+        if(errors.length > 0) {
+            callbackFunction(errors);
+        } else {
+            callbackFunction(null);
+        }
+    }
+
+    function validateUser(user, songId, callbackFunction) {
+        console.log(user);
+        let filter = {author: user, _id: songId};
+        songsRepository.getSongs(filter, {}).then(songs => {
+            if (songs.length === 0) {
+                callbackFunction({error: "La canción no pertenece al usuario"});
+            }
+            else {
+                callbackFunction(null)
+            }
+        });
+
+    }
+
 }
 
