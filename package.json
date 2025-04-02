@@ -1,17 +1,10 @@
 {
-  "name": "tienda_musica",
-  "version": "1.0.0",
-  "description": "Tienda de música",
-  "main": "hello-world-server.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/uo295180/sdi-2425-412-lab-nodejs.git"
-  },
+  "name": "memoryapp",
+  "version": "0.0.0",
   "private": true,
+  "scripts": {},
   "dependencies": {
-    "express": "^4.18.3"
+    "express": "^4.18.3",
+    "http-errors": "~1.6.3"
   }
 }
